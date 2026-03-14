@@ -18,6 +18,17 @@ The format is based on [Keep a Changelog]
 
 ### Internal
 
+## [1.0.1] - 2026-03-14
+
+### Added
+
+- Year duration unit (`1y`, `2y`) for due dates
+
+### Fixed
+
+- Absolute dates without year (e.g. `01.01`) now auto-bump to next year if in past
+- Today's date (e.g. `27.07` on July 27) stays in the current year
+
 ## [1.0.0] - 2026-03-14
 
 ### Added
@@ -35,5 +46,5 @@ The format is based on [Keep a Changelog]
 
 <!-- Links to versions -->
 
-[unreleased]: https://github.com/vovarevenko/raycast-triage/v1.0.0...HEAD
+[unreleased]: https://github.com/vovarevenko/raycast-triage/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/vovarevenko/raycast-triage/releases/tag/v1.0.0

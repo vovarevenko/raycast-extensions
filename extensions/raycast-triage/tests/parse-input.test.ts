@@ -169,6 +169,20 @@ describe('parseDueDate', () => {
       expect(r.dueDate.getDate()).toBe(3)
       expect(r.dueDate.getMonth()).toBe(7)
     })
+
+    it('1y → 27.07.1997', () => {
+      const r = d('1y')!
+      expect(r.hasTime).toBe(false)
+      expect(r.dueDate.getDate()).toBe(27)
+      expect(r.dueDate.getMonth()).toBe(6)
+      expect(r.dueDate.getFullYear()).toBe(1997)
+    })
+
+    it('2y → 27.07.1998', () => {
+      const r = d('2y')!
+      expect(r.hasTime).toBe(false)
+      expect(r.dueDate.getFullYear()).toBe(1998)
+    })
   })
 
   describe('relative — day+ with explicit time', () => {
@@ -179,10 +193,26 @@ describe('parseDueDate', () => {
       expect(r.dueDate.getHours()).toBe(21)
       expect(r.dueDate.getMinutes()).toBe(25)
     })
+
+    it('1y 14:00 → 27.07.1997 14:00', () => {
+      const r = d('1y 14:00')!
+      expect(r.hasTime).toBe(true)
+      expect(r.dueDate.getFullYear()).toBe(1997)
+      expect(r.dueDate.getHours()).toBe(14)
+    })
   })
 
   describe('absolute date', () => {
-    it('DD.MM → current year', () => {
+    it('DD.MM future date → current year', () => {
+      // 01.08 is after 27.07 → stays 1996
+      const r = d('01.08')!
+      expect(r.hasTime).toBe(false)
+      expect(r.dueDate.getDate()).toBe(1)
+      expect(r.dueDate.getMonth()).toBe(7)
+      expect(r.dueDate.getFullYear()).toBe(1996)
+    })
+
+    it('DD.MM future date → current year (September)', () => {
       const r = d('20.09')!
       expect(r.hasTime).toBe(false)
       expect(r.dueDate.getDate()).toBe(20)
@@ -190,28 +220,60 @@ describe('parseDueDate', () => {
       expect(r.dueDate.getFullYear()).toBe(1996)
     })
 
-    it('DD.MM.YY → 2-digit year', () => {
+    it('DD.MM past date → bumps to next year', () => {
+      // 01.01 is before 27.07 → bumps to 1997
+      const r = d('01.01')!
+      expect(r.hasTime).toBe(false)
+      expect(r.dueDate.getDate()).toBe(1)
+      expect(r.dueDate.getMonth()).toBe(0)
+      expect(r.dueDate.getFullYear()).toBe(1997)
+    })
+
+    it('DD.MM same month past day → bumps to next year', () => {
+      // 01.07 is before 27.07 → bumps to 1997
+      const r = d('01.07')!
+      expect(r.dueDate.getMonth()).toBe(6)
+      expect(r.dueDate.getFullYear()).toBe(1997)
+    })
+
+    it('DD.MM today → stays current year', () => {
+      // 27.07 is today → no bump
+      const r = d('27.07')!
+      expect(r.dueDate.getFullYear()).toBe(1996)
+    })
+
+    it('DD.MM.YY → explicit year, no bump', () => {
+      // Explicit year is never bumped, even if in the past
       const r = d('20.09.26')!
       expect(r.hasTime).toBe(false)
       expect(r.dueDate.getFullYear()).toBe(2026)
     })
 
-    it('DD.MM.YYYY → 4-digit year', () => {
+    it('DD.MM.YYYY → explicit year, no bump', () => {
       const r = d('20.09.2026')!
       expect(r.dueDate.getFullYear()).toBe(2026)
     })
   })
 
   describe('absolute date — with time', () => {
-    it('DD.MM HH:MM', () => {
+    it('DD.MM HH:MM future → current year', () => {
       const r = d('20.09 14:00')!
       expect(r.hasTime).toBe(true)
       expect(r.dueDate.getDate()).toBe(20)
       expect(r.dueDate.getMonth()).toBe(8)
+      expect(r.dueDate.getFullYear()).toBe(1996)
       expect(r.dueDate.getHours()).toBe(14)
     })
 
-    it('DD.MM.YY HH:MM', () => {
+    it('DD.MM HH:MM past → bumps to next year', () => {
+      const r = d('15.03 10:00')!
+      expect(r.hasTime).toBe(true)
+      expect(r.dueDate.getMonth()).toBe(2)
+      expect(r.dueDate.getFullYear()).toBe(1997)
+      expect(r.dueDate.getHours()).toBe(10)
+    })
+
+    it('DD.MM.YY HH:MM → explicit year, no bump', () => {
       const r = d('1.12.26 9:30')!
       expect(r.hasTime).toBe(true)
       expect(r.dueDate.getDate()).toBe(1)
